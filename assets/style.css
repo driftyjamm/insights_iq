@@ -1,0 +1,23 @@
+.main {
+    background-color: #050816;
+}
+
+.main-title {
+    color: white;
+    font-size: 50px;
+    font-weight: bold;
+}
+
+.subtitle {
+    color: #9ca3af;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: #111827;
+    padding: 25px;
+    border-radius: 18px;
+    color: white;
+    border: 1px solid #1f2937;
+}
