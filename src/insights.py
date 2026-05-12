@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def generate_insights(df, problem):
+def show_insights(df, problem):
 
     st.title("📈 AI Business Insights")
 
