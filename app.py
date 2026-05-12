@@ -1,106 +1,192 @@
 import streamlit as st
 import pandas as pd
 
-from src.preprocessor import clean_data
+from src.preprocess import clean_data
 from src.model import train_model
-from src.comparison import show_comparison
 from src.prediction import prediction_page
-from src.insights import generate_insights
+from src.insights import show_insights
 
+# ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="InsightsIQ",
-    page_icon="🧠",
-    layout="wide"
+    layout="wide",
+    page_icon="📊"
 )
 
-with open("assets/style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# ---------------- CUSTOM CSS ----------------
+st.markdown("""
+<style>
+.stApp {
+    background-color: #050814;
+    color: white;
+}
 
-with st.sidebar:
+/* Logo */
+.logo {
+    font-size: 34px;
+    font-weight: 800;
+    color: white;
+    padding-top: 10px;
+}
 
-    st.title("🧠 InsightsIQ")
+/* Top nav */
+.nav-container {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    background: rgba(255,255,255,0.04);
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
 
-    page = st.radio(
-        "Navigation",
-        [
-            "Dashboard",
-            "Upload Dataset",
-            "Preprocessing",
-            "Model Training",
-            "Model Comparison",
-            "Prediction",
-            "Insights"
-        ]
-    )
+/* Header */
+.main-title {
+    font-size: 48px;
+    font-weight: 800;
+    margin-top: 10px;
+}
 
+.sub-title {
+    color: #8b9dc3;
+    font-size: 18px;
+    margin-bottom: 40px;
+}
+
+/* 3D cards */
+.metric-card {
+    background: linear-gradient(145deg, #111827, #1f2937);
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+    box-shadow:
+        8px 8px 20px rgba(0,0,0,0.55),
+        -4px -4px 12px rgba(255,255,255,0.04);
+    transition: 0.3s;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-title {
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+.metric-value {
+    font-size: 34px;
+    font-weight: bold;
+    color: #60a5fa;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------- HEADER ----------------
+st.markdown('<div class="logo">INSIGHTSIQ</div>', unsafe_allow_html=True)
+
+# ---------------- TOP NAV ----------------
+tabs = [
+    "Dashboard",
+    "Upload Dataset",
+    "Preprocessing",
+    "Model Training",
+    "Prediction",
+    "Insights"
+]
+
+selected = st.radio(
+    "",
+    tabs,
+    horizontal=True
+)
+
+st.markdown("---")
+
+# ---------------- HERO ----------------
+st.markdown('<div class="main-title">AI Customer Churn Analytics</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Enterprise-grade predictive intelligence platform</div>', unsafe_allow_html=True)
+
+# ---------------- SESSION ----------------
 if "df" not in st.session_state:
     st.session_state.df = None
 
-st.markdown("<div class='main-title'>InsightsIQ</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>AI Powered Customer Churn Analytics Platform</div>", unsafe_allow_html=True)
+# ---------------- DASHBOARD ----------------
+if selected == "Dashboard":
 
-if page == "Dashboard":
+    c1, c2, c3, c4 = st.columns(4)
 
-    col1, col2, col3, col4 = st.columns(4)
+    with c1:
+        st.markdown("""
+        <div class="metric-card">
+            <div class="metric-title">Models</div>
+            <div class="metric-value">4</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    col1.metric("Models", "4")
-    col2.metric("AI Type", "Ensemble")
-    col3.metric("Dataset", "Telecom")
-    col4.metric("Status", "Ready")
+    with c2:
+        st.markdown("""
+        <div class="metric-card">
+            <div class="metric-title">Dataset Size</div>
+            <div class="metric-value">Live</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown("---")
+    with c3:
+        st.markdown("""
+        <div class="metric-card">
+            <div class="metric-title">Prediction Engine</div>
+            <div class="metric-value">AI</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.info("Upload telecom churn dataset to begin training advanced AI models.")
+    with c4:
+        st.markdown("""
+        <div class="metric-card">
+            <div class="metric-title">Status</div>
+            <div class="metric-value">Active</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-elif page == "Upload Dataset":
+# ---------------- UPLOAD ----------------
+elif selected == "Upload Dataset":
 
-    st.subheader("📂 Upload Dataset")
+    st.header("Upload Dataset")
 
-    file = st.file_uploader("Upload CSV File", type=["csv"])
+    file = st.file_uploader("Upload CSV", type=["csv"])
 
     if file:
-
         df = pd.read_csv(file)
         st.session_state.df = df
-
         st.success("Dataset uploaded successfully")
-
         st.dataframe(df.head())
 
-elif page == "Preprocessing":
-
-    st.subheader("🧹 Data Cleaning & Preprocessing")
+# ---------------- PREPROCESSING ----------------
+elif selected == "Preprocessing":
 
     if st.session_state.df is not None:
-
-        cleaned_df = clean_data(st.session_state.df)
-        st.session_state.cleaned_df = cleaned_df
-
-        st.success("Preprocessing completed")
-
-        st.dataframe(cleaned_df.head())
-
+        st.session_state.df = clean_data(st.session_state.df)
+        st.success("Data cleaned successfully")
+        st.dataframe(st.session_state.df.head())
     else:
         st.warning("Upload dataset first")
 
-elif page == "Model Training":
+# ---------------- MODEL TRAINING ----------------
+elif selected == "Model Training":
 
-    if "cleaned_df" in st.session_state:
-
-        train_model(st.session_state.cleaned_df)
-
+    if st.session_state.df is not None:
+        train_model(st.session_state.df)
     else:
-        st.warning("Complete preprocessing first")
+        st.warning("Upload dataset first")
 
-elif page == "Model Comparison":
-
-    show_comparison()
-
-elif page == "Prediction":
+# ---------------- PREDICTION ----------------
+elif selected == "Prediction":
 
     prediction_page()
 
-elif page == "Insights":
+# ---------------- INSIGHTS ----------------
+elif selected == "Insights":
 
-    if "cleaned_df" in st.session_state:
-        generate_insights(st.session_state.cleaned_df)
+    show_insights()
