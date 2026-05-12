@@ -102,7 +102,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     )
 
     fig_cm.update_layout(title="Confusion Matrix", template="plotly_dark")
-    st.plotly_chart(fig_cm, use_container_width=True)
+    st.plotly_chart(fig_cm, use_container_width=True, key=f"{name}_cm")
 
     # ---------------- GRAPH 2: ROC Curve ----------------
     if probs is not None:
@@ -118,7 +118,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
             template="plotly_dark"
         )
 
-        st.plotly_chart(fig_roc, use_container_width=True)
+        st.plotly_chart(fig_roc, use_container_width=True, key=f"{name}_roc")
 
     # ---------------- GRAPH 3: Feature Importance ----------------
     if hasattr(model, "feature_importances_"):
@@ -137,7 +137,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         )
 
         fig_feat.update_layout(template="plotly_dark")
-        st.plotly_chart(fig_feat, use_container_width=True)
+        st.plotly_chart(fig_feat, use_container_width=True, key=f"{name}_feature")
 
     # ---------------- GRAPH 4: Prediction Distribution ----------------
     pred_df = pd.DataFrame({"Prediction": preds})
@@ -149,7 +149,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     )
 
     fig_pred.update_layout(template="plotly_dark")
-    st.plotly_chart(fig_pred, use_container_width=True)
+    st.plotly_chart(fig_pred, use_container_width=True, key=f"{name}_prediction")
 
     # ---------------- GRAPH 5: Metrics Comparison ----------------
     metric_df = pd.DataFrame({
@@ -166,7 +166,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     )
 
     fig_metrics.update_layout(template="plotly_dark")
-    st.plotly_chart(fig_metrics, use_container_width=True)
+    st.plotly_chart(fig_metrics, use_container_width=True, key=f"{name}_metrics")
 
     # ---------------- GRAPH 6: Gauge ----------------
     fig_gauge = go.Figure(go.Indicator(
@@ -176,7 +176,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     ))
 
     fig_gauge.update_layout(template="plotly_dark")
-    st.plotly_chart(fig_gauge, use_container_width=True)
+    st.plotly_chart(fig_gauge, use_container_width=True, key=f"{name}_gauge")
 
     # ---------------- ALGORITHM EXPLANATION ----------------
     st.markdown("## 🧠 Algorithm Working")
