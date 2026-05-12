@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from src.preprocess import clean_data
+from src.preprocessor import clean_data
 from src.model import train_model
 from src.prediction import prediction_page
 from src.insights import show_insights
