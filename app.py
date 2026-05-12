@@ -87,7 +87,7 @@ elif page == "Model Training":
 
     if "cleaned_df" in st.session_state:
 
-        train_models(st.session_state.cleaned_df)
+        train_model(st.session_state.cleaned_df)
 
     else:
         st.warning("Complete preprocessing first")
