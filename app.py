@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from src.preprocessor import clean_data
-from src.model import train_models
+from src.model import train_model
 from src.comparison import show_comparison
 from src.prediction import prediction_page
 from src.insights import generate_insights
