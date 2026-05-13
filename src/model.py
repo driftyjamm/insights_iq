@@ -260,44 +260,95 @@ def model_comparison():
         st.warning("Train models first")
         return
 
-    st.title("Model Comparison")
-
-    results = st.session_state.model_results
-
-    st.dataframe(results, use_container_width=True)
-
-    fig1 = px.bar(
-        results,
-        x="Model",
-        y="Accuracy",
-        color="Accuracy",
-        title="Accuracy Comparison"
+    results = st.session_state.model_results.sort_values(
+        "Accuracy",
+        ascending=False
     )
 
-    fig1.update_layout(template="plotly_dark", height=350)
-    st.plotly_chart(fig1, use_container_width=True)
+    st.title("AI Model Benchmarking Center")
 
-    metric_data = results.melt(
-        id_vars=["Model"],
-        value_vars=["Precision", "Recall", "F1 Score"],
-        var_name="Metric",
-        value_name="Score"
+    # ---------------- Leaderboard Cards ----------------
+    st.subheader("Performance Leaderboard")
+
+    cols = st.columns(len(results))
+
+    medals = ["🥇", "🥈", "🥉", "⭐"]
+
+    for i, (_, row) in enumerate(results.iterrows()):
+        with cols[i]:
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(145deg,#111827,#1f2937);
+                padding:20px;
+                border-radius:18px;
+                box-shadow:0 10px 30px rgba(0,0,0,0.4);
+                text-align:center;
+            ">
+                <h3>{medals[i]} {row['Model']}</h3>
+                <h1>{row['Accuracy']:.3f}</h1>
+                <p>Accuracy</p>
+                <hr>
+                <p>Precision: {row['Precision']:.3f}</p>
+                <p>Recall: {row['Recall']:.3f}</p>
+                <p>F1: {row['F1 Score']:.3f}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ---------------- Heatmap ----------------
+    st.subheader("Metric Heatmap")
+
+    heat_df = results.set_index("Model")
+
+    fig_heat = px.imshow(
+        heat_df,
+        text_auto=True,
+        aspect="auto",
+        title="Metric Comparison Matrix"
     )
 
-    fig2 = px.line(
-        metric_data,
-        x="Metric",
-        y="Score",
-        color="Model",
-        markers=True
+    fig_heat.update_layout(template="plotly_dark", height=450)
+
+    st.plotly_chart(fig_heat, use_container_width=True)
+
+    st.info("Darker cells indicate stronger performance.")
+
+    # ---------------- Radar ----------------
+    st.subheader("Radar Comparison")
+
+    import plotly.graph_objects as go
+
+    fig_radar = go.Figure()
+
+    for _, row in results.iterrows():
+        fig_radar.add_trace(go.Scatterpolar(
+            r=[
+                row["Accuracy"],
+                row["Precision"],
+                row["Recall"],
+                row["F1 Score"]
+            ],
+            theta=["Accuracy", "Precision", "Recall", "F1"],
+            fill='toself',
+            name=row["Model"]
+        ))
+
+    fig_radar.update_layout(
+        template="plotly_dark",
+        height=500
     )
 
-    fig2.update_layout(template="plotly_dark", height=350)
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig_radar, use_container_width=True)
 
-    best = results.sort_values("Accuracy", ascending=False).iloc[0]
+    # ---------------- Recommendation ----------------
+    best = results.iloc[0]
 
-    st.success(
-        f"Best Model: {best['Model']} "
-        f"(Accuracy: {best['Accuracy']:.3f})"
-    )
+    st.success(f"""
+Recommended Production Model: **{best['Model']}**
+
+Why:
+- Highest predictive accuracy
+- Best metric balance
+- Suitable for churn classification deployment
+""")
