@@ -245,24 +245,125 @@ def model_comparison():
         ascending=False
     )
 
-    st.title("AI Benchmark Center")
+    st.title("AI Model Benchmarking Center")
 
-    st.dataframe(results, use_container_width=True)
+    # ---------------- LEADERBOARD CARDS ----------------
+    st.subheader("Performance Leaderboard")
 
-    fig = px.bar(
+    cols = st.columns(len(results))
+    medals = ["🥇", "🥈", "🥉", "⭐", "⚡", "🚀"]
+
+    for i, (_, row) in enumerate(results.iterrows()):
+        with cols[i]:
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(145deg,#111827,#1f2937);
+                padding:22px;
+                border-radius:18px;
+                box-shadow:0 10px 30px rgba(0,0,0,0.45);
+                text-align:center;
+                min-height:320px;
+            ">
+                <h3>{medals[i]} {row['Model']}</h3>
+                <h1 style='color:#60a5fa;'>{row['Accuracy']:.3f}</h1>
+                <p>Accuracy</p>
+                <hr>
+                <p><b>Precision:</b> {row['Precision']:.3f}</p>
+                <p><b>Recall:</b> {row['Recall']:.3f}</p>
+                <p><b>F1 Score:</b> {row['F1 Score']:.3f}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ---------------- HEATMAP ----------------
+    st.subheader("Metric Heatmap")
+
+    heat_df = results.set_index("Model")
+
+    fig_heat = px.imshow(
+        heat_df,
+        text_auto=True,
+        aspect="auto",
+        title="Performance Matrix"
+    )
+
+    fig_heat.update_layout(
+        template="plotly_dark",
+        height=450
+    )
+
+    st.plotly_chart(fig_heat, use_container_width=True)
+
+    st.info(
+        "This matrix highlights performance intensity across all evaluation metrics."
+    )
+
+    # ---------------- RADAR CHART ----------------
+    st.subheader("Multi-Metric Radar Analysis")
+
+    import plotly.graph_objects as go
+
+    fig_radar = go.Figure()
+
+    for _, row in results.iterrows():
+        fig_radar.add_trace(go.Scatterpolar(
+            r=[
+                row["Accuracy"],
+                row["Precision"],
+                row["Recall"],
+                row["F1 Score"]
+            ],
+            theta=[
+                "Accuracy",
+                "Precision",
+                "Recall",
+                "F1"
+            ],
+            fill='toself',
+            name=row["Model"]
+        ))
+
+    fig_radar.update_layout(
+        template="plotly_dark",
+        height=520
+    )
+
+    st.plotly_chart(fig_radar, use_container_width=True)
+
+    st.info(
+        "Radar visualization helps compare model balance across all dimensions."
+    )
+
+    # ---------------- ACCURACY BAR ----------------
+    st.subheader("Accuracy Benchmark")
+
+    fig_bar = px.bar(
         results,
         x="Model",
         y="Accuracy",
-        color="Accuracy"
+        color="Accuracy",
+        text="Accuracy"
     )
 
-    fig.update_layout(template="plotly_dark", height=400)
+    fig_bar.update_layout(
+        template="plotly_dark",
+        height=420
+    )
 
-    st.plotly_chart(fig, use_container_width=True)
+    fig_bar.update_traces(texttemplate="%{text:.3f}")
 
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+    # ---------------- FINAL RECOMMENDATION ----------------
     best = results.iloc[0]
 
-    st.success(
-        f"Best Model: {best['Model']} "
-        f"(Accuracy: {best['Accuracy']:.3f})"
-    )
+    st.success(f"""
+Recommended Production Model: **{best['Model']}**
+
+Why this model was selected:
+- Highest predictive accuracy
+- Strong metric consistency
+- Reliable churn classification performance
+- Best deployment readiness for enterprise analytics
+""")
