@@ -7,7 +7,13 @@ import plotly.graph_objects as go
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 
-from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTE
+
+from sklearn.model_selection import (
+    train_test_split,
+    GridSearchCV
+)
+
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -19,6 +25,7 @@ from sklearn.metrics import (
 )
 
 from sklearn.preprocessing import LabelEncoder
+
 from sklearn.ensemble import (
     RandomForestClassifier,
     GradientBoostingClassifier,
@@ -27,20 +34,15 @@ from sklearn.ensemble import (
 )
 
 
-# ---------------- TARGET VALIDATION ----------------
+# ---------------- TARGET ----------------
 def prepare_target(y):
 
     if y.dtype == "object":
         le = LabelEncoder()
         y = le.fit_transform(y)
 
-    unique_vals = len(pd.Series(y).unique())
-
-    if unique_vals > 10:
-        st.error(
-            "❌ Invalid target column.\n\n"
-            "Select categorical/binary target like Churn / Class"
-        )
+    if len(pd.Series(y).unique()) > 10:
+        st.error("Select categorical target like Churn/Class")
         return None
 
     return y
@@ -48,25 +50,16 @@ def prepare_target(y):
 
 # ---------------- MODEL INFO ----------------
 MODEL_INFO = {
-    "Random Forest": "Builds multiple decision trees and combines them using majority voting.",
-    "Gradient Boosting": "Sequentially corrects errors from previous trees.",
-    "Extra Trees": "Highly randomized tree ensemble for fast generalization.",
-    "AdaBoost": "Boosts weak learners by focusing on misclassified samples."
+    "Random Forest": "Multiple decision trees combined through majority voting.",
+    "Gradient Boosting": "Sequentially corrects prediction errors.",
+    "Extra Trees": "Randomized ensemble trees for faster learning.",
+    "AdaBoost": "Boosts weak learners iteratively.",
+    "XGBoost": "Optimized gradient boosting with regularization.",
+    "CatBoost": "Handles categorical features efficiently."
 }
 
 
-# ---------------- METRIC CARDS ----------------
-def metric_cards(acc, prec, rec, f1):
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    c1.metric("Accuracy", f"{acc:.3f}")
-    c2.metric("Precision", f"{prec:.3f}")
-    c3.metric("Recall", f"{rec:.3f}")
-    c4.metric("F1 Score", f"{f1:.3f}")
-
-
-# ---------------- MODEL DASHBOARD ----------------
+# ---------------- DASHBOARD ----------------
 def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
 
     st.header(name)
@@ -76,11 +69,13 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     rec = recall_score(y_test, preds, average="weighted")
     f1 = f1_score(y_test, preds, average="weighted")
 
-    metric_cards(acc, prec, rec, f1)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Accuracy", f"{acc:.3f}")
+    c2.metric("Precision", f"{prec:.3f}")
+    c3.metric("Recall", f"{rec:.3f}")
+    c4.metric("F1", f"{f1:.3f}")
 
-    st.markdown("---")
-
-    # 1 Confusion Matrix
+    # Confusion Matrix
     cm = confusion_matrix(y_test, preds)
 
     fig_cm = ff.create_annotated_heatmap(
@@ -88,29 +83,26 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         x=["Pred 0", "Pred 1"],
         y=["Actual 0", "Actual 1"]
     )
+
     fig_cm.update_layout(template="plotly_dark", height=260)
-
     st.plotly_chart(fig_cm, use_container_width=True, key=f"{name}_cm")
-    st.info("Shows correct vs incorrect predictions.")
+    st.info("Prediction correctness distribution.")
 
-    # 2 ROC
+    # ROC
     if probs is not None and len(set(y_test)) == 2:
-
         fpr, tpr, _ = roc_curve(y_test, probs)
         roc_auc = auc(fpr, tpr)
 
         fig_roc = px.area(
             x=fpr,
             y=tpr,
-            title=f"ROC Curve (AUC={roc_auc:.2f})"
+            title=f"ROC AUC = {roc_auc:.3f}"
         )
 
         fig_roc.update_layout(template="plotly_dark", height=260)
-
         st.plotly_chart(fig_roc, use_container_width=True, key=f"{name}_roc")
-        st.info("Higher AUC means stronger classification ability.")
 
-    # 3 Feature Importance
+    # Feature Importance
     if hasattr(model, "feature_importances_"):
 
         feat_df = pd.DataFrame({
@@ -122,57 +114,18 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
             feat_df,
             x="Importance",
             y="Feature",
-            orientation="h",
-            title="Top Features"
+            orientation="h"
         )
 
         fig_feat.update_layout(template="plotly_dark", height=280)
 
         st.plotly_chart(fig_feat, use_container_width=True, key=f"{name}_feat")
-        st.info("Ranks most influential features.")
-
-    # 4 Prediction Distribution
-    fig_pred = px.histogram(x=preds, title="Prediction Distribution")
-    fig_pred.update_layout(template="plotly_dark", height=250)
-
-    st.plotly_chart(fig_pred, use_container_width=True, key=f"{name}_pred")
-    st.info("Shows predicted class balance.")
-
-    # 5 Metric Trend
-    metric_df = pd.DataFrame({
-        "Metric": ["Accuracy", "Precision", "Recall", "F1"],
-        "Score": [acc, prec, rec, f1]
-    })
-
-    fig_metric = px.line(
-        metric_df,
-        x="Metric",
-        y="Score",
-        markers=True
-    )
-
-    fig_metric.update_layout(template="plotly_dark", height=250)
-
-    st.plotly_chart(fig_metric, use_container_width=True, key=f"{name}_metric")
-    st.info("Compares all evaluation metrics.")
-
-    # 6 Gauge
-    fig_gauge = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=acc * 100,
-        title={'text': "Accuracy"}
-    ))
-
-    fig_gauge.update_layout(template="plotly_dark", height=250)
-
-    st.plotly_chart(fig_gauge, use_container_width=True, key=f"{name}_gauge")
-    st.info("Overall model performance score.")
 
     st.subheader("Algorithm Working")
     st.write(MODEL_INFO[name])
 
 
-# ---------------- TRAIN MODELS ----------------
+# ---------------- TRAIN ----------------
 def train_model(df):
 
     st.title("Advanced Model Training")
@@ -186,16 +139,38 @@ def train_model(df):
         return
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X,
+        y,
+        test_size=0.2,
+        random_state=42
     )
+
+    # SMOTE
+    smote = SMOTE(random_state=42)
+    X_train, y_train = smote.fit_resample(X_train, y_train)
+
+    st.success("SMOTE balancing applied")
 
     if st.button("Train Models"):
 
+        rf_grid = GridSearchCV(
+            RandomForestClassifier(),
+            {
+                "n_estimators": [100, 200],
+                "max_depth": [5, 10]
+            },
+            cv=3
+        )
+
+        rf_grid.fit(X_train, y_train)
+
+        st.info(f"Optimized RF Params: {rf_grid.best_params_}")
+
         models = {
-            "Random Forest": RandomForestClassifier(),
+            "Random Forest": rf_grid.best_estimator_,
             "Gradient Boosting": GradientBoostingClassifier(),
             "Extra Trees": ExtraTreesClassifier(),
-            "AdaBoost": AdaBoostClassifier()
+            "AdaBoost": AdaBoostClassifier(),
             "XGBoost": XGBClassifier(eval_metric="logloss"),
             "CatBoost": CatBoostClassifier(verbose=0)
         }
@@ -248,17 +223,17 @@ def train_model(df):
                     X
                 )
 
-        best_model = max(
+        best = max(
             trained.items(),
             key=lambda x: accuracy_score(y_test, x[1]["preds"])
         )
 
-        st.session_state.model = best_model[1]["model"]
+        st.session_state.model = best[1]["model"]
         st.session_state.columns = X.columns
         st.session_state.original_df = df
 
 
-# ---------------- COMPARISON PAGE ----------------
+# ---------------- COMPARISON ----------------
 def model_comparison():
 
     if "model_results" not in st.session_state:
@@ -270,90 +245,24 @@ def model_comparison():
         ascending=False
     )
 
-    st.title("AI Model Benchmarking Center")
+    st.title("AI Benchmark Center")
 
-    # ---------------- Leaderboard Cards ----------------
-    st.subheader("Performance Leaderboard")
+    st.dataframe(results, use_container_width=True)
 
-    cols = st.columns(len(results))
-
-    medals = ["🥇", "🥈", "🥉", "⭐"]
-
-    for i, (_, row) in enumerate(results.iterrows()):
-        with cols[i]:
-            st.markdown(f"""
-            <div style="
-                background: linear-gradient(145deg,#111827,#1f2937);
-                padding:20px;
-                border-radius:18px;
-                box-shadow:0 10px 30px rgba(0,0,0,0.4);
-                text-align:center;
-            ">
-                <h3>{medals[i]} {row['Model']}</h3>
-                <h1>{row['Accuracy']:.3f}</h1>
-                <p>Accuracy</p>
-                <hr>
-                <p>Precision: {row['Precision']:.3f}</p>
-                <p>Recall: {row['Recall']:.3f}</p>
-                <p>F1: {row['F1 Score']:.3f}</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    # ---------------- Heatmap ----------------
-    st.subheader("Metric Heatmap")
-
-    heat_df = results.set_index("Model")
-
-    fig_heat = px.imshow(
-        heat_df,
-        text_auto=True,
-        aspect="auto",
-        title="Metric Comparison Matrix"
+    fig = px.bar(
+        results,
+        x="Model",
+        y="Accuracy",
+        color="Accuracy"
     )
 
-    fig_heat.update_layout(template="plotly_dark", height=450)
+    fig.update_layout(template="plotly_dark", height=400)
 
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Darker cells indicate stronger performance.")
-
-    # ---------------- Radar ----------------
-    st.subheader("Radar Comparison")
-
-    import plotly.graph_objects as go
-
-    fig_radar = go.Figure()
-
-    for _, row in results.iterrows():
-        fig_radar.add_trace(go.Scatterpolar(
-            r=[
-                row["Accuracy"],
-                row["Precision"],
-                row["Recall"],
-                row["F1 Score"]
-            ],
-            theta=["Accuracy", "Precision", "Recall", "F1"],
-            fill='toself',
-            name=row["Model"]
-        ))
-
-    fig_radar.update_layout(
-        template="plotly_dark",
-        height=500
-    )
-
-    st.plotly_chart(fig_radar, use_container_width=True)
-
-    # ---------------- Recommendation ----------------
     best = results.iloc[0]
 
-    st.success(f"""
-Recommended Production Model: **{best['Model']}**
-
-Why:
-- Highest predictive accuracy
-- Best metric balance
-- Suitable for churn classification deployment
-""")
+    st.success(
+        f"Best Model: {best['Model']} "
+        f"(Accuracy: {best['Accuracy']:.3f})"
+    )
