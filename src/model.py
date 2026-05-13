@@ -4,6 +4,9 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
+from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
+
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score,
@@ -193,6 +196,8 @@ def train_model(df):
             "Gradient Boosting": GradientBoostingClassifier(),
             "Extra Trees": ExtraTreesClassifier(),
             "AdaBoost": AdaBoostClassifier()
+            "XGBoost": XGBClassifier(eval_metric="logloss"),
+            "CatBoost": CatBoostClassifier(verbose=0)
         }
 
         trained = {}
