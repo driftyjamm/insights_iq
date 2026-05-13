@@ -100,7 +100,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
 
     st.markdown("---")
 
-    # 1 Confusion Matrix
+    # ---------------- 1. Confusion Matrix ----------------
     cm = confusion_matrix(y_test, preds)
 
     fig_cm = ff.create_annotated_heatmap(
@@ -109,10 +109,23 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         y=["Actual 0", "Actual 1"]
     )
 
-    fig_cm.update_layout(template="plotly_dark")
+    fig_cm.update_layout(template="plotly_dark", height=260)
+
     st.plotly_chart(fig_cm, use_container_width=True, key=f"{name}_cm")
 
-    # 2 ROC
+    st.info("""
+**Confusion Matrix Explanation**
+
+Shows how many predictions were correct vs incorrect.
+
+- Top-left → Correct negative predictions  
+- Bottom-right → Correct positive predictions  
+- Other cells → Wrong predictions
+
+A strong model has high diagonal values.
+""")
+
+    # ---------------- 2. ROC Curve ----------------
     if probs is not None and len(set(y_test)) == 2:
 
         fpr, tpr, _ = roc_curve(y_test, probs)
@@ -124,10 +137,23 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
             title=f"ROC Curve (AUC={roc_auc:.2f})"
         )
 
-        fig_roc.update_layout(template="plotly_dark")
+        fig_roc.update_layout(template="plotly_dark", height=260)
+
         st.plotly_chart(fig_roc, use_container_width=True, key=f"{name}_roc")
 
-    # 3 Feature Importance
+        st.info(f"""
+**ROC Curve Explanation**
+
+Measures classification quality.
+
+- X-axis → False Positive Rate  
+- Y-axis → True Positive Rate  
+- AUC = {roc_auc:.2f}
+
+Higher AUC means better separation between churn and non-churn customers.
+""")
+
+    # ---------------- 3. Feature Importance ----------------
     if hasattr(model, "feature_importances_"):
 
         feat_df = pd.DataFrame({
@@ -143,32 +169,88 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
             title="Top Features"
         )
 
-        fig_feat.update_layout(template="plotly_dark")
+        fig_feat.update_layout(template="plotly_dark", height=280)
+
         st.plotly_chart(fig_feat, use_container_width=True, key=f"{name}_feat")
 
-    # 4 Prediction Distribution
+        st.info("""
+**Feature Importance Explanation**
+
+Ranks the variables affecting prediction most.
+
+Higher bars indicate stronger influence on churn prediction.
+
+This helps identify which customer attributes drive churn behavior.
+""")
+
+    # ---------------- 4. Prediction Distribution ----------------
     fig_pred = px.histogram(
         x=preds,
         title="Prediction Distribution"
     )
 
-    fig_pred.update_layout(template="plotly_dark")
+    fig_pred.update_layout(template="plotly_dark", height=250)
+
     st.plotly_chart(fig_pred, use_container_width=True, key=f"{name}_pred")
 
-    # 5 Gauge
+    st.info("""
+**Prediction Distribution Explanation**
+
+Shows how many customers were predicted in each class.
+
+Balanced distribution indicates stable model behavior.
+""")
+
+    # ---------------- 5. Metric Trend ----------------
+    metric_df = pd.DataFrame({
+        "Metric": ["Accuracy", "Precision", "Recall", "F1"],
+        "Score": [acc, prec, rec, f1]
+    })
+
+    fig_metric = px.line(
+        metric_df,
+        x="Metric",
+        y="Score",
+        markers=True
+    )
+
+    fig_metric.update_layout(template="plotly_dark", height=250)
+
+    st.plotly_chart(fig_metric, use_container_width=True, key=f"{name}_metric")
+
+    st.info("""
+**Metric Trend Explanation**
+
+Compares all evaluation metrics.
+
+- Accuracy → Overall correctness  
+- Precision → Reliability of positive predictions  
+- Recall → Ability to detect churn cases  
+- F1 Score → Balance between precision and recall
+""")
+
+    # ---------------- 6. Gauge ----------------
     fig_gauge = go.Figure(go.Indicator(
         mode="gauge+number",
         value=acc * 100,
-        title={'text': "Accuracy"}
+        title={'text': "Model Accuracy"}
     ))
 
-    fig_gauge.update_layout(template="plotly_dark")
+    fig_gauge.update_layout(template="plotly_dark", height=250)
+
     st.plotly_chart(fig_gauge, use_container_width=True, key=f"{name}_gauge")
 
-    # Algorithm section
+    st.info("""
+**Accuracy Gauge Explanation**
+
+Provides an instant performance summary.
+
+Closer to 100% means stronger prediction capability.
+""")
+
+    # ---------------- Algorithm ----------------
     st.markdown("## Algorithm Working")
     st.info(MODEL_INFO[name])
-
 
 # ---------------- MAIN TRAIN ----------------
 def train_model(df):
