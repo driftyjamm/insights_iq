@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from src.preprocessor import clean_data
-from src.model import train_model
+from src.model import train_model, model_comparison
 from src.prediction import prediction_page
 from src.insights import show_insights
 
@@ -93,6 +93,7 @@ tabs = [
     "Upload Dataset",
     "Preprocessing",
     "Model Training",
+    "Model Comparison",
     "Prediction",
     "Insights"
 ]
@@ -180,6 +181,9 @@ elif selected == "Model Training":
         train_model(st.session_state.df)
     else:
         st.warning("Upload dataset first")
+
+elif selected == "Model Comparison":
+    model_comparison()
 
 # ---------------- PREDICTION ----------------
 elif selected == "Prediction":
