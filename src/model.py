@@ -317,6 +317,95 @@ def train_model(df):
                     X
                 )
 
+
+def model_comparison():
+
+    if "model_results" not in st.session_state:
+        st.warning("Train models first")
+        return
+
+    st.title("📊 Model Comparison Dashboard")
+
+    results = st.session_state.model_results
+
+    st.dataframe(results, use_container_width=True)
+
+    # Accuracy comparison
+    fig1 = px.bar(
+        results,
+        x="Model",
+        y="Accuracy",
+        color="Accuracy",
+        title="Accuracy Comparison"
+    )
+    fig1.update_layout(template="plotly_dark", height=350)
+    st.plotly_chart(fig1, use_container_width=True)
+
+    st.info("""
+**Accuracy Comparison**
+
+Shows overall correctness of each model.
+
+Higher values indicate better prediction performance.
+""")
+
+    # Precision / Recall / F1
+    metric_data = results.melt(
+        id_vars=["Model"],
+        value_vars=["Precision", "Recall", "F1 Score"],
+        var_name="Metric",
+        value_name="Score"
+    )
+
+    fig2 = px.line(
+        metric_data,
+        x="Metric",
+        y="Score",
+        color="Model",
+        markers=True,
+        title="Metric Comparison"
+    )
+
+    fig2.update_layout(template="plotly_dark", height=350)
+    st.plotly_chart(fig2, use_container_width=True)
+
+    st.info("""
+**Metric Comparison**
+
+Compares prediction quality across all models.
+""")
+
+    # Radar chart
+    fig3 = go.Figure()
+
+    for _, row in results.iterrows():
+        fig3.add_trace(go.Scatterpolar(
+            r=[
+                row["Accuracy"],
+                row["Precision"],
+                row["Recall"],
+                row["F1 Score"]
+            ],
+            theta=["Accuracy", "Precision", "Recall", "F1"],
+            fill='toself',
+            name=row["Model"]
+        ))
+
+    fig3.update_layout(
+        polar=dict(radialaxis=dict(visible=True)),
+        template="plotly_dark",
+        height=450,
+        title="Overall Performance Radar"
+    )
+
+    st.plotly_chart(fig3, use_container_width=True)
+
+    best = results.sort_values("Accuracy", ascending=False).iloc[0]
+
+    st.success(
+        f"🏆 Best Model: {best['Model']} "
+        f"(Accuracy: {best['Accuracy']:.3f})"
+    )
         # Save best model
         st.session_state.model = trained["Random Forest"]["model"]
         st.session_state.columns = X.columns
