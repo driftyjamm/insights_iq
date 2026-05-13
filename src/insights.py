@@ -67,6 +67,20 @@ def show_insights(df=None):
 
     # ================= NEW ANALYST INSIGHTS =================
 
+    st.subheader("Retention Cost Analysis")
+
+    customers = st.number_input("Customers at Risk", 100)
+    retention_cost = st.number_input("Retention Cost per Customer", 50)
+    loss_per_customer = st.number_input("Loss per Churned Customer", 500)
+    
+    saved = customers * loss_per_customer
+    cost = customers * retention_cost
+    roi = saved - cost
+
+    st.metric("Estimated Savings", f"${saved}")
+    st.metric("Retention Cost", f"${cost}")
+    st.metric("Net ROI", f"${roi}")
+    
     # ---------------- CORRELATION ----------------
     numeric_df = df.select_dtypes(include=np.number)
 
