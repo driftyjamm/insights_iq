@@ -17,71 +17,96 @@ st.set_page_config(
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
+
+/* Main app */
 .stApp {
-    background-color: #050814;
-    color: white;
+    background-color: #f8fafc;
+    color: #1e293b;
 }
 
 /* Logo */
 .logo {
     font-size: 34px;
     font-weight: 800;
-    color: white;
+    color: #111827;
     padding-top: 10px;
 }
 
-/* Top nav */
+/* Navigation */
 .nav-container {
     display: flex;
     justify-content: center;
     gap: 18px;
-    background: rgba(255,255,255,0.04);
+    background: #ffffff;
     padding: 14px;
     border-radius: 14px;
     margin-bottom: 30px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
-/* Header */
+/* Main heading */
 .main-title {
     font-size: 48px;
     font-weight: 800;
-    margin-top: 10px;
+    color: #111827;
 }
 
 .sub-title {
-    color: #8b9dc3;
+    color: #64748b;
     font-size: 18px;
     margin-bottom: 40px;
 }
 
-/* 3D cards */
+/* Metric cards */
 .metric-card {
-    background: linear-gradient(145deg, #111827, #1f2937);
+    background: #ffffff;
     border-radius: 18px;
     padding: 24px;
     text-align: center;
+    border: 1px solid #e5e7eb;
     box-shadow:
-        8px 8px 20px rgba(0,0,0,0.55),
-        -4px -4px 12px rgba(255,255,255,0.04);
-    transition: 0.3s;
+        0 10px 25px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+    transition: 0.3s ease;
 }
 
 .metric-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 16px 35px rgba(0,0,0,0.12);
 }
 
 .metric-title {
-    color: #9ca3af;
+    color: #6b7280;
     font-size: 16px;
 }
 
 .metric-value {
     font-size: 34px;
     font-weight: bold;
-    color: #60a5fa;
+    color: #2563eb;
 }
+
+/* Tables */
+[data-testid="stDataFrame"] {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Buttons */
+.stButton>button {
+    background: #2563eb;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 18px;
+}
+
+.stButton>button:hover {
+    background: #1d4ed8;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
