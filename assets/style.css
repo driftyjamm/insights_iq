@@ -1,23 +1,94 @@
-.main {
-    background-color: #050816;
+st.markdown("""
+<style>
+
+/* Main app */
+.stApp {
+    background-color: #f8fafc;
+    color: #1e293b;
 }
 
-.main-title {
-    color: white;
-    font-size: 50px;
-    font-weight: bold;
+/* Logo */
+.logo {
+    font-size: 34px;
+    font-weight: 800;
+    color: #111827;
+    padding-top: 10px;
 }
 
-.subtitle {
-    color: #9ca3af;
-    font-size: 18px;
+/* Navigation */
+.nav-container {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 14px;
     margin-bottom: 30px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
-.card {
-    background: #111827;
-    padding: 25px;
-    border-radius: 18px;
-    color: white;
-    border: 1px solid #1f2937;
+/* Main heading */
+.main-title {
+    font-size: 48px;
+    font-weight: 800;
+    color: #111827;
 }
+
+.sub-title {
+    color: #64748b;
+    font-size: 18px;
+    margin-bottom: 40px;
+}
+
+/* Metric cards */
+.metric-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+    transition: 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 35px rgba(0,0,0,0.12);
+}
+
+.metric-title {
+    color: #6b7280;
+    font-size: 16px;
+}
+
+.metric-value {
+    font-size: 34px;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+/* Tables */
+[data-testid="stDataFrame"] {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Buttons */
+.stButton>button {
+    background: #2563eb;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 18px;
+}
+
+.stButton>button:hover {
+    background: #1d4ed8;
+}
+
+</style>
+""", unsafe_allow_html=True)
