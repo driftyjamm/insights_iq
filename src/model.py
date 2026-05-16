@@ -248,12 +248,13 @@ def model_comparison():
     st.title("AI Model Benchmarking Center")
 
     # ---------------- LEADERBOARD CARDS ----------------
-    st.subheader("Performance Leaderboard")
+    # ---------------- Leaderboard Cards ----------------
+st.subheader("Performance Leaderboard")
 
-    cols = st.columns(len(results))
-    medals = ["🥇", "🥈", "🥉", "⭐", "⚡", "🚀"]
+cols = st.columns(len(results))
+medals = ["🥇", "🥈", "🥉", "⭐", "🚀", "⚡"]
 
-    for i, (_, row) in enumerate(results.iterrows()):
+for i, (_, row) in enumerate(results.iterrows()):
     with cols[i]:
         st.markdown(f"""
         <div style="
@@ -286,8 +287,6 @@ def model_comparison():
             <p style="color:#334155;">F1 Score: {row['F1 Score']:.3f}</p>
         </div>
         """, unsafe_allow_html=True)
-
-    st.markdown("---")
 
     # ---------------- HEATMAP ----------------
     st.subheader("Metric Heatmap")
