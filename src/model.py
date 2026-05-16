@@ -71,11 +71,12 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
 
     # Confusion Matrix
     cm = confusion_matrix(y_test, preds)
+    labels = [f"Class {i}" for i in range(cm.shape[0])]
 
     fig_cm = ff.create_annotated_heatmap(
         z=cm,
-        x=["Pred 0", "Pred 1"],
-        y=["Actual 0", "Actual 1"]
+        x=labels,
+        y=labels
     )
 
     fig_cm.update_layout(template="plotly_dark", height=260)
