@@ -330,13 +330,10 @@ def train_model(df):
 
         st.info(f"Optimized RF Params: {rf_grid.best_params_}")
 
+        num_classes = len(pd.Series(y_train).unique())
+
         models = {
             "Random Forest": rf_grid.best_estimator_,
-
-            "Gradient Boosting": GradientBoostingClassifier(
-                n_estimators=200,
-                learning_rate=0.05
-            ),
 
             "Extra Trees": ExtraTreesClassifier(
                 n_estimators=300,
@@ -348,13 +345,6 @@ def train_model(df):
                 learning_rate=0.8
             ),
 
-            "XGBoost": XGBClassifier(
-                n_estimators=250,
-                max_depth=6,
-                learning_rate=0.05,
-                eval_metric="logloss"
-            ),
-
             "CatBoost": CatBoostClassifier(
                 iterations=250,
                 depth=6,
@@ -362,12 +352,43 @@ def train_model(df):
             )
         }
 
+        # Binary classification models
+        if num_classes == 2:
+
+            models["Gradient Boosting"] = GradientBoostingClassifier(
+            n_estimators=200,
+            learning_rate=0.05
+        )
+
+        models["XGBoost"] = XGBClassifier(
+            n_estimators=250,
+            max_depth=6,
+            learning_rate=0.05,
+            eval_metric="logloss"
+        )
+
+        # Multi-class support
+        else:
+
+            models["XGBoost"] = XGBClassifier(
+                n_estimators=250,
+                max_depth=6,
+                learning_rate=0.05,
+                objective="multi:softprob",
+                num_class=num_classes
+        )
+            
         trained = {}
         results = []
 
         for name, model in models.items():
 
-            model.fit(X_train, y_train)
+            try:
+                model.fit(X_train, y_train)
+
+            except Exception as e:
+                st.warning(f"{name} skipped: {e}")
+                continue
 
             preds = model.predict(X_test)
 
