@@ -83,7 +83,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
 
     # ROC Curve
         # ROC Curve
-    if probs is not None and len(set(y_test)) == 2:
+    if probs is not None and len(pd.Series(y_test).unique()) == 2:
 
         fpr, tpr, _ = roc_curve(y_test, probs)
         roc_auc = auc(fpr, tpr)
@@ -372,8 +372,16 @@ def train_model(df):
             preds = model.predict(X_test)
 
             probs = None
+
             if hasattr(model, "predict_proba"):
-                probs = model.predict_proba(X_test)[:, 1]
+
+                pred_probs = model.predict_proba(X_test)
+
+                if pred_probs.shape[1] == 2:
+                    probs = pred_probs[:, 1]
+
+                else:
+                     probs = None
 
             acc = accuracy_score(y_test, preds)
             prec = precision_score(y_test, preds, average="weighted")
