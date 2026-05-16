@@ -245,7 +245,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     """
     }
 
-st.code(ALGO_DIAGRAMS[name], language="text")
+    st.code(ALGO_DIAGRAMS[name], language="text")
 
     st.subheader("Performance Interpretation")
 
