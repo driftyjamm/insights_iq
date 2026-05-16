@@ -82,62 +82,62 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     st.plotly_chart(fig_cm, use_container_width=True)
 
     # ROC Curve
+        # ROC Curve
     if probs is not None and len(set(y_test)) == 2:
 
-    fpr, tpr, _ = roc_curve(y_test, probs)
-    roc_auc = auc(fpr, tpr)
+        fpr, tpr, _ = roc_curve(y_test, probs)
+        roc_auc = auc(fpr, tpr)
 
-    fig_roc = px.area(
-        x=fpr,
-        y=tpr,
-        title=f"ROC Curve Analysis (AUC = {roc_auc:.3f})"
-    )
+        fig_roc = px.area(
+            x=fpr,
+            y=tpr,
+            title=f"ROC Curve Analysis (AUC = {roc_auc:.3f})"
+        )
 
-    fig_roc.update_layout(
-        template="plotly_dark",
-        height=320,
-        xaxis_title="False Positive Rate",
-        yaxis_title="True Positive Rate"
-    )
+        fig_roc.update_layout(
+            template="plotly_dark",
+            height=320,
+            xaxis_title="False Positive Rate",
+            yaxis_title="True Positive Rate"
+        )
 
-    st.plotly_chart(fig_roc, use_container_width=True)
+        st.plotly_chart(fig_roc, use_container_width=True)
 
     # Professional Interpretation
-    if roc_auc >= 0.90:
-        performance = "Excellent"
-        explanation = "The model has outstanding discrimination capability."
-    elif roc_auc >= 0.80:
-        performance = "Very Good"
-        explanation = "The model separates churn and non-churn effectively."
-    elif roc_auc >= 0.70:
-        performance = "Good"
-        explanation = "The model performs reasonably well with acceptable predictive capability."
-    elif roc_auc >= 0.60:
-        performance = "Moderate"
-        explanation = "The model has some predictive power but needs improvement."
-    else:
-        performance = "Weak"
-        explanation = "The model struggles to distinguish classes accurately."
+        if roc_auc >= 0.90:
+            performance = "Excellent"
+            explanation = "The model has outstanding discrimination capability."
+        elif roc_auc >= 0.80:
+            performance = "Very Good"
+            explanation = "The model separates churn and non-churn effectively."
+        elif roc_auc >= 0.70:
+            performance = "Good"
+            explanation = "The model performs reasonably well with acceptable predictive capability."
+        elif roc_auc >= 0.60:
+            performance = "Moderate"
+            explanation = "The model has some predictive power but needs improvement."
+        else:
+            performance = "Weak"
+            explanation = "The model struggles to distinguish classes accurately."
 
-    st.info(f"""
-        ### ROC Curve Interpretation
+        st.info(f"""
+    ### ROC Curve Interpretation
 
-        **AUC Score:** {roc_auc:.3f}
+    **AUC Score:** {roc_auc:.3f}
 
-        **Performance Level:** {performance}
+    **Performance Level:** {performance}
 
-        **What this means:**
-        The ROC curve evaluates how well the model distinguishes between churned and retained customers.
+    **What this means:**  
+    The ROC curve evaluates how effectively the model distinguishes between churned and retained customers.
 
-        - **Higher curve = Better performance**
-        - **Closer to top-left = Strong classifier**
-        - **AUC near 1.0 = Ideal**
-        - **AUC near 0.5 = Random guessing**
+    - Higher curve = Better classification
+    - Top-left corner = Strong performance
+    - AUC near 1.0 = Excellent
+    - AUC near 0.5 = Random guessing
 
-        **Analysis:**  
-        {explanation}
+    **Interpretation:**  
+    {explanation}
     """)
-
     # Feature Importance
     if hasattr(model, "feature_importances_"):
 
