@@ -424,9 +424,9 @@ def train_model(df):
 
         st.session_state.model_results = pd.DataFrame(results)
 
-        tabs = st.tabs(list(models.keys()))
-
-        for i, name in enumerate(models.keys()):
+        tabs = st.tabs(list(trained.keys()))
+        
+        for i, name in enumerate(trained.keys()):
             with tabs[i]:
                 show_model_dashboard(
                     name,
