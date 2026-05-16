@@ -370,12 +370,12 @@ def train_model(df):
         # Multi-class support
         else:
             models["XGBoost"] = XGBClassifier(
-            n_estimators=250,
-            max_depth=6,
-            learning_rate=0.05,
-            objective="multi:softprob",
-            num_class=num_classes
-        )
+                n_estimators=250,
+                max_depth=6,
+                learning_rate=0.05,
+                objective="multi:softprob",
+                num_class=num_classes
+            )
             
         trained = {}
         results = []
