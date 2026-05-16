@@ -254,25 +254,38 @@ def model_comparison():
     medals = ["🥇", "🥈", "🥉", "⭐", "⚡", "🚀"]
 
     for i, (_, row) in enumerate(results.iterrows()):
-        with cols[i]:
-            st.markdown(f"""
-            <div style="
-                background: linear-gradient(145deg,#111827,#1f2937);
-                padding:22px;
-                border-radius:18px;
-                box-shadow:0 10px 30px rgba(0,0,0,0.45);
-                text-align:center;
-                min-height:320px;
+    with cols[i]:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(145deg,#ffffff,#f1f5f9);
+            padding:24px;
+            border-radius:20px;
+            border:1px solid #e5e7eb;
+            box-shadow:0 12px 28px rgba(0,0,0,0.08);
+            text-align:center;
+            min-height:370px;
+        ">
+            <h3 style="color:#111827;">
+                {medals[i]} {row['Model']}
+            </h3>
+
+            <h1 style="
+                color:#2563eb;
+                font-size:52px;
+                margin:20px 0;
             ">
-                <h3>{medals[i]} {row['Model']}</h3>
-                <h1 style='color:#60a5fa;'>{row['Accuracy']:.3f}</h1>
-                <p>Accuracy</p>
-                <hr>
-                <p><b>Precision:</b> {row['Precision']:.3f}</p>
-                <p><b>Recall:</b> {row['Recall']:.3f}</p>
-                <p><b>F1 Score:</b> {row['F1 Score']:.3f}</p>
-            </div>
-            """, unsafe_allow_html=True)
+                {row['Accuracy']:.3f}
+            </h1>
+
+            <p style="color:#64748b;">Accuracy</p>
+
+            <hr style="border:1px solid #e5e7eb;">
+
+            <p style="color:#334155;">Precision: {row['Precision']:.3f}</p>
+            <p style="color:#334155;">Recall: {row['Recall']:.3f}</p>
+            <p style="color:#334155;">F1 Score: {row['F1 Score']:.3f}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -289,7 +302,7 @@ def model_comparison():
     )
 
     fig_heat.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=450
     )
 
@@ -325,7 +338,7 @@ def model_comparison():
         ))
 
     fig_radar.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=520
     )
 
@@ -347,7 +360,7 @@ def model_comparison():
     )
 
     fig_bar.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=420
     )
 
