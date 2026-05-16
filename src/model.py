@@ -159,6 +159,32 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     st.subheader("Algorithm Working")
     st.write(MODEL_INFO[name])
 
+    st.subheader("Performance Interpretation")
+
+    if acc >= 0.90:
+        insight = "Exceptional predictive performance with strong class separation."
+    elif acc >= 0.80:
+        insight = "Strong predictive capability with reliable churn detection."
+    elif acc >= 0.70:
+        insight = """
+    Moderate performance.
+
+    This accuracy suggests the dataset contains partially separable churn patterns.
+
+    A score around 0.70 is common in churn prediction because customer behavior is influenced by hidden business factors not fully captured in structured tabular data.
+
+    Similar scores across models indicate:
+    • Limited feature separability  
+    • Dataset complexity  
+    • Similar decision boundaries learned by ensemble models
+    """
+    elif acc >= 0.60:
+        insight = "Model captures weak churn patterns and requires feature engineering."
+    else:
+        insight = "Low predictive capability. More preprocessing and better features required."
+
+    st.info(insight)
+
 
 # ---------------- TRAIN ----------------
 def train_model(df):
@@ -203,11 +229,34 @@ def train_model(df):
 
         models = {
             "Random Forest": rf_grid.best_estimator_,
-            "Gradient Boosting": GradientBoostingClassifier(),
-            "Extra Trees": ExtraTreesClassifier(),
-            "AdaBoost": AdaBoostClassifier(),
-            "XGBoost": XGBClassifier(eval_metric="logloss"),
-            "CatBoost": CatBoostClassifier(verbose=0)
+
+            "Gradient Boosting": GradientBoostingClassifier(
+                n_estimators=200,
+                learning_rate=0.05
+            ),
+
+            "Extra Trees": ExtraTreesClassifier(
+                n_estimators=300,
+                max_depth=15
+            ),
+
+            "AdaBoost": AdaBoostClassifier(
+                n_estimators=200,
+                learning_rate=0.8
+            ),
+
+            "XGBoost": XGBClassifier(
+                n_estimators=250,
+                max_depth=6,
+                learning_rate=0.05,
+                eval_metric="logloss"
+            ),
+
+            "CatBoost": CatBoostClassifier(
+                iterations=250,
+                depth=6,
+                verbose=0
+            )
         }
 
         trained = {}
