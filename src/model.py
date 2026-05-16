@@ -156,8 +156,96 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         fig_feat.update_layout(template="plotly_dark", height=280)
         st.plotly_chart(fig_feat, use_container_width=True)
 
-    st.subheader("Algorithm Working")
-    st.write(MODEL_INFO[name])
+    st.subheader("Algorithm Workflow")
+
+    ALGO_DIAGRAMS = {
+
+        "Random Forest": """
+    Input Data
+       ↓
+    Bootstrap Sampling
+       ↓
+    Multiple Decision Trees
+       ↓
+    Independent Predictions
+       ↓
+    Majority Voting
+       ↓
+    Final Churn Prediction
+    """,
+
+        "Gradient Boosting": """
+    Input Data
+       ↓
+    Train Weak Learner
+       ↓
+    Calculate Errors
+       ↓
+    Correct Residuals
+       ↓
+    Sequential Learning
+       ↓
+    Final Optimized Prediction
+    """,
+
+        "Extra Trees": """
+    Input Data
+       ↓
+    Random Feature Selection
+       ↓
+    Random Split Generation
+       ↓
+    Multiple Random Trees
+       ↓
+    Aggregate Outputs
+       ↓
+    Final Prediction
+    """,
+
+        "AdaBoost": """
+    Input Data
+       ↓
+    Train Weak Classifier
+       ↓
+    Increase Error Weights
+       ↓
+    Train Next Learner
+       ↓
+    Weighted Voting
+       ↓
+    Final Prediction
+    """,
+
+        "XGBoost": """
+    Input Data
+       ↓
+    Gradient Optimization
+       ↓
+    Tree Construction
+       ↓
+    Regularization
+       ↓
+    Error Minimization
+       ↓
+    Final Prediction
+    """,
+
+        "CatBoost": """
+    Input Data
+       ↓
+    Categorical Encoding
+       ↓
+    Ordered Boosting
+       ↓
+    Gradient Updates
+       ↓
+    Bias Reduction
+       ↓
+    Final Prediction
+    """
+    }
+
+st.code(ALGO_DIAGRAMS[name], language="text")
 
     st.subheader("Performance Interpretation")
 
