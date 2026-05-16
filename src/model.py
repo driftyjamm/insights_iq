@@ -6,14 +6,9 @@ import plotly.graph_objects as go
 
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
-
 from imblearn.over_sampling import SMOTE
 
-from sklearn.model_selection import (
-    train_test_split,
-    GridSearchCV
-)
-
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -36,7 +31,6 @@ from sklearn.ensemble import (
 
 # ---------------- TARGET ----------------
 def prepare_target(y):
-
     if y.dtype == "object":
         le = LabelEncoder()
         y = le.fit_transform(y)
@@ -85,10 +79,9 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
     )
 
     fig_cm.update_layout(template="plotly_dark", height=260)
-    st.plotly_chart(fig_cm, use_container_width=True, key=f"{name}_cm")
-    st.info("Prediction correctness distribution.")
+    st.plotly_chart(fig_cm, use_container_width=True)
 
-    # ROC
+    # ROC Curve
     if probs is not None and len(set(y_test)) == 2:
         fpr, tpr, _ = roc_curve(y_test, probs)
         roc_auc = auc(fpr, tpr)
@@ -100,7 +93,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         )
 
         fig_roc.update_layout(template="plotly_dark", height=260)
-        st.plotly_chart(fig_roc, use_container_width=True, key=f"{name}_roc")
+        st.plotly_chart(fig_roc, use_container_width=True)
 
     # Feature Importance
     if hasattr(model, "feature_importances_"):
@@ -118,8 +111,7 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         )
 
         fig_feat.update_layout(template="plotly_dark", height=280)
-
-        st.plotly_chart(fig_feat, use_container_width=True, key=f"{name}_feat")
+        st.plotly_chart(fig_feat, use_container_width=True)
 
     st.subheader("Algorithm Working")
     st.write(MODEL_INFO[name])
@@ -145,7 +137,7 @@ def train_model(df):
         random_state=42
     )
 
-    # SMOTE
+    # SMOTE balancing
     smote = SMOTE(random_state=42)
     X_train, y_train = smote.fit_resample(X_train, y_train)
 
@@ -247,74 +239,51 @@ def model_comparison():
 
     st.title("AI Model Benchmarking Center")
 
-    # ---------------- LEADERBOARD CARDS ----------------
-    # ---------------- Leaderboard Cards ----------------
-st.subheader("Performance Leaderboard")
+    # Leaderboard Cards
+    st.subheader("Performance Leaderboard")
 
-cols = st.columns(len(results))
-medals = ["🥇", "🥈", "🥉", "⭐", "🚀", "⚡"]
+    cols = st.columns(len(results))
+    medals = ["🥇", "🥈", "🥉", "⭐", "⚡", "🚀"]
 
-for i, (_, row) in enumerate(results.iterrows()):
-    with cols[i]:
-        st.markdown(f"""
-        <div style="
-            background: linear-gradient(145deg,#ffffff,#f1f5f9);
-            padding:24px;
-            border-radius:20px;
-            border:1px solid #e5e7eb;
-            box-shadow:0 12px 28px rgba(0,0,0,0.08);
-            text-align:center;
-            min-height:370px;
-        ">
-            <h3 style="color:#111827;">
-                {medals[i]} {row['Model']}
-            </h3>
-
-            <h1 style="
-                color:#2563eb;
-                font-size:52px;
-                margin:20px 0;
+    for i, (_, row) in enumerate(results.iterrows()):
+        with cols[i]:
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(145deg,#ffffff,#f1f5f9);
+                padding:24px;
+                border-radius:20px;
+                border:1px solid #e5e7eb;
+                box-shadow:0 12px 28px rgba(0,0,0,0.08);
+                text-align:center;
+                min-height:370px;
             ">
-                {row['Accuracy']:.3f}
-            </h1>
+                <h3 style="color:#111827;">{medals[i]} {row['Model']}</h3>
+                <h1 style="color:#2563eb;">{row['Accuracy']:.3f}</h1>
+                <p style="color:#64748b;">Accuracy</p>
+                <hr>
+                <p style="color:#334155;">Precision: {row['Precision']:.3f}</p>
+                <p style="color:#334155;">Recall: {row['Recall']:.3f}</p>
+                <p style="color:#334155;">F1 Score: {row['F1 Score']:.3f}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-            <p style="color:#64748b;">Accuracy</p>
+    st.markdown("---")
 
-            <hr style="border:1px solid #e5e7eb;">
-
-            <p style="color:#334155;">Precision: {row['Precision']:.3f}</p>
-            <p style="color:#334155;">Recall: {row['Recall']:.3f}</p>
-            <p style="color:#334155;">F1 Score: {row['F1 Score']:.3f}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # ---------------- HEATMAP ----------------
+    # Heatmap
     st.subheader("Metric Heatmap")
 
-    heat_df = results.set_index("Model")
-
     fig_heat = px.imshow(
-        heat_df,
+        results.set_index("Model"),
         text_auto=True,
         aspect="auto",
         title="Performance Matrix"
     )
 
-    fig_heat.update_layout(
-        template="plotly_white",
-        height=450
-    )
-
+    fig_heat.update_layout(template="plotly_white", height=450)
     st.plotly_chart(fig_heat, use_container_width=True)
 
-    st.info(
-        "This matrix highlights performance intensity across all evaluation metrics."
-    )
-
-    # ---------------- RADAR CHART ----------------
+    # Radar
     st.subheader("Multi-Metric Radar Analysis")
-
-    import plotly.graph_objects as go
 
     fig_radar = go.Figure()
 
@@ -326,28 +295,15 @@ for i, (_, row) in enumerate(results.iterrows()):
                 row["Recall"],
                 row["F1 Score"]
             ],
-            theta=[
-                "Accuracy",
-                "Precision",
-                "Recall",
-                "F1"
-            ],
+            theta=["Accuracy", "Precision", "Recall", "F1"],
             fill='toself',
             name=row["Model"]
         ))
 
-    fig_radar.update_layout(
-        template="plotly_white",
-        height=520
-    )
-
+    fig_radar.update_layout(template="plotly_white", height=520)
     st.plotly_chart(fig_radar, use_container_width=True)
 
-    st.info(
-        "Radar visualization helps compare model balance across all dimensions."
-    )
-
-    # ---------------- ACCURACY BAR ----------------
+    # Accuracy Bar
     st.subheader("Accuracy Benchmark")
 
     fig_bar = px.bar(
@@ -358,16 +314,12 @@ for i, (_, row) in enumerate(results.iterrows()):
         text="Accuracy"
     )
 
-    fig_bar.update_layout(
-        template="plotly_white",
-        height=420
-    )
-
+    fig_bar.update_layout(template="plotly_white", height=420)
     fig_bar.update_traces(texttemplate="%{text:.3f}")
 
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # ---------------- FINAL RECOMMENDATION ----------------
+    # Recommendation
     best = results.iloc[0]
 
     st.success(f"""
@@ -377,5 +329,5 @@ Why this model was selected:
 - Highest predictive accuracy
 - Strong metric consistency
 - Reliable churn classification performance
-- Best deployment readiness for enterprise analytics
+- Best deployment readiness
 """)
