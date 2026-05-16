@@ -356,16 +356,16 @@ def train_model(df):
         if num_classes == 2:
 
             models["Gradient Boosting"] = GradientBoostingClassifier(
-            n_estimators=200,
-            learning_rate=0.05
-        )
+                n_estimators=200,
+                learning_rate=0.05
+            )
 
-        models["XGBoost"] = XGBClassifier(
-            n_estimators=250,
-            max_depth=6,
-            learning_rate=0.05,
-            eval_metric="logloss"
-        )
+            models["XGBoost"] = XGBClassifier(
+                n_estimators=250,
+                max_depth=6,
+                learning_rate=0.05,
+                eval_metric="logloss"
+            )    
 
         # Multi-class support
         else:
