@@ -120,23 +120,23 @@ def show_model_dashboard(name, model, X_test, y_test, preds, probs, X):
         explanation = "The model struggles to distinguish classes accurately."
 
     st.info(f"""
-### ROC Curve Interpretation
+        ### ROC Curve Interpretation
 
-**AUC Score:** {roc_auc:.3f}
+        **AUC Score:** {roc_auc:.3f}
 
-**Performance Level:** {performance}
+        **Performance Level:** {performance}
 
-**What this means:**
-The ROC curve evaluates how well the model distinguishes between churned and retained customers.
+        **What this means:**
+        The ROC curve evaluates how well the model distinguishes between churned and retained customers.
 
-- **Higher curve = Better performance**
-- **Closer to top-left = Strong classifier**
-- **AUC near 1.0 = Ideal**
-- **AUC near 0.5 = Random guessing**
+        - **Higher curve = Better performance**
+        - **Closer to top-left = Strong classifier**
+        - **AUC near 1.0 = Ideal**
+        - **AUC near 0.5 = Random guessing**
 
-**Analysis:**  
-{explanation}
-""")
+        **Analysis:**  
+        {explanation}
+    """)
 
     # Feature Importance
     if hasattr(model, "feature_importances_"):
