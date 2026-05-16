@@ -59,11 +59,25 @@ to detect customer churn patterns.
 
         if pd.api.types.is_numeric_dtype(df[col]):
 
+            # Clean numeric values
+            col_data = pd.to_numeric(df[col], errors="coerce").dropna()
+
+            if len(col_data) == 0:
+                continue
+
+            min_val = float(col_data.min())
+            max_val = float(col_data.max())
+            default_val = float(col_data.mean())
+
+            # Prevent slider crash if min == max
+            if min_val == max_val:
+                max_val = min_val + 1
+
             val = cols[i % 2].slider(
                 col,
-                float(df[col].min()),
-                float(df[col].max()),
-                float(df[col].mean()),
+                min_value=min_val,
+                max_value=max_val,
+                value=default_val,
                 key=f"pred_{col}"
             )
 
