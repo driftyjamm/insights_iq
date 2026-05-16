@@ -295,10 +295,25 @@ def train_model(df):
     )
 
     # SMOTE balancing
-    smote = SMOTE(random_state=42)
-    X_train, y_train = smote.fit_resample(X_train, y_train)
+    # ---------------- SMART SMOTE ----------------
+    class_counts = pd.Series(y_train).value_counts()
 
-    st.success("SMOTE balancing applied")
+    if len(class_counts) > 1 and class_counts.min() >= 6:
+
+        smote = SMOTE(random_state=42)
+        X_train, y_train = smote.fit_resample(X_train, y_train)
+
+        st.success("SMOTE balancing applied")
+
+    else:
+        st.warning("""
+    SMOTE skipped.
+
+    Reason:
+    Dataset has insufficient minority class samples.
+
+    Model training will continue without balancing.
+    """)
 
     if st.button("Train Models"):
 
